@@ -28,6 +28,53 @@ $GAME_IDS = [
     "league" => "com.riotgames.league",
 ];
 
+function client_ip(): string
+{
+    $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+    if ($forwardedFor) {
+        $parts = explode(',', $forwardedFor);
+        return trim($parts[0]);
+    }
+
+    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+}
+
+function track_active_user(?string $action = null, ?string $game = null): void
+{
+    $runtimeDir = __DIR__ . '/runtime';
+    if (!is_dir($runtimeDir)) {
+        mkdir($runtimeDir, 0777, true);
+    }
+
+    $file = $runtimeDir . '/active_users.json';
+    $now = time();
+    $ip = client_ip();
+    $users = [];
+
+    if (is_file($file)) {
+        $existing = json_decode((string) file_get_contents($file), true);
+        if (is_array($existing)) {
+            $users = $existing;
+        }
+    }
+
+    foreach ($users as $userIp => $seen) {
+        $lastSeen = is_array($seen) ? ($seen['last_seen'] ?? 0) : 0;
+        if (!is_int($lastSeen) || $lastSeen < $now - 900) {
+            unset($users[$userIp]);
+        }
+    }
+
+    $users[$ip] = [
+        'ip' => $ip,
+        'last_seen' => $now,
+        'action' => $action ?: 'unknown',
+        'game' => $game ?: 'unknown',
+    ];
+
+    file_put_contents($file, json_encode($users, JSON_PRETTY_PRINT), LOCK_EX);
+}
+
 function encode_varint(int $n): string
 {
     $out = '';
@@ -110,6 +157,7 @@ $sid = isset($input["sid"]) && is_string($input["sid"]) ? $input["sid"] : null;
 $gameToken = isset($input["gametoken"]) && is_string($input["gametoken"]) ? $input["gametoken"] : null;
 $response_b64 = isset($input["response"]) && is_string($input["response"]) ? $input["response"] : null;
 
+track_active_user($action, $requested_game);
 
 if ($action === "auth") {
 
