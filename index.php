@@ -247,6 +247,11 @@ function seen_label(int $lastSeen, int $now): string
             white-space: nowrap;
         }
 
+        .keepalive {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
         .empty {
             padding: 34px 22px;
             color: var(--muted);
@@ -294,7 +299,7 @@ function seen_label(int $lastSeen, int $now): string
                         <h2>Active IPs</h2>
                         <span>Updated every 30 seconds</span>
                     </div>
-                    <span>15 min window</span>
+                    <span class="keepalive" id="keepalive">Keep-alive armed</span>
                 </div>
 
                 <div class="user-list">
@@ -321,5 +326,24 @@ function seen_label(int $lastSeen, int $now): string
             </section>
         </section>
     </main>
+    <script>
+        const keepalive = document.getElementById('keepalive');
+
+        async function pingGateway() {
+            try {
+                await fetch('/health.php?keepalive=' + Date.now(), {
+                    cache: 'no-store',
+                    credentials: 'same-origin'
+                });
+
+                keepalive.textContent = 'Keep-alive active';
+            } catch (error) {
+                keepalive.textContent = 'Keep-alive retrying';
+            }
+        }
+
+        pingGateway();
+        setInterval(pingGateway, 240000);
+    </script>
 </body>
 </html>
