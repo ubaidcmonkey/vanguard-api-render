@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: vanguard-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health.php
