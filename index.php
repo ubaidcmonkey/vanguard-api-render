@@ -1,7 +1,30 @@
 <?php
 require_once __DIR__ . '/access_control.php';
+require_once __DIR__ . '/license_gate.php';
 
 reject_unlisted_ip();
+
+if (isset($_GET['license_logout'])) {
+    logout_license();
+    header('Location: /');
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $licenseKey = isset($_POST['license_key']) && is_string($_POST['license_key']) ? $_POST['license_key'] : '';
+    $licenseResult = authenticate_license($licenseKey);
+    if (!empty($licenseResult['success'])) {
+        header('Location: /');
+        exit;
+    }
+
+    $licenseError = isset($licenseResult['message']) && is_string($licenseResult['message']) ? $licenseResult['message'] : 'License rejected.';
+    render_license_gate($licenseError);
+}
+
+if (!license_is_authenticated()) {
+    render_license_gate();
+}
 
 http_response_code(200);
 
