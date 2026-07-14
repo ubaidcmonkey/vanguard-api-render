@@ -83,9 +83,7 @@ function fail(int $code, string $message): never
     die(json_encode(["success" => false, "message" => $message]));
 }
 
-if (!api_access_is_allowed()) {
-    fail(403, "ip not whitelisted");
-}
+reject_unlisted_ip();
 
 function decrypt_resp(string $payload, string $privateKeyPem): string
 {
