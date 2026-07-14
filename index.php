@@ -1,31 +1,4 @@
 <?php
-require_once __DIR__ . '/access_control.php';
-require_once __DIR__ . '/license_gate.php';
-
-reject_unlisted_ip();
-
-if (isset($_GET['license_logout'])) {
-    logout_license();
-    header('Location: /');
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $licenseKey = isset($_POST['license_key']) && is_string($_POST['license_key']) ? $_POST['license_key'] : '';
-    $licenseResult = authenticate_license($licenseKey);
-    if (!empty($licenseResult['success'])) {
-        header('Location: /');
-        exit;
-    }
-
-    $licenseError = isset($licenseResult['message']) && is_string($licenseResult['message']) ? $licenseResult['message'] : 'License rejected.';
-    render_license_gate($licenseError);
-}
-
-if (!license_is_authenticated()) {
-    render_license_gate();
-}
-
 http_response_code(200);
 
 $activeWindow = 900;
@@ -279,18 +252,6 @@ function seen_label(int $lastSeen, int $now): string
             font-size: 12px;
         }
 
-        .admin-link {
-            width: fit-content;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: var(--gold-soft);
-            background: rgba(245, 196, 81, 0.08);
-            font-size: 13px;
-            font-weight: 800;
-            text-decoration: none;
-        }
-
         .empty {
             padding: 34px 22px;
             color: var(--muted);
@@ -323,7 +284,6 @@ function seen_label(int $lastSeen, int $now): string
             <div class="eyebrow"><span class="pulse"></span> Live Gateway Monitor</div>
             <h1>ECHO</h1>
             <p class="subtitle">Vanguard API status panel tracking recent gateway activity and live player connections.</p>
-            <a class="admin-link" href="/admin.php">Admin Panel</a>
         </section>
 
         <section class="grid">
