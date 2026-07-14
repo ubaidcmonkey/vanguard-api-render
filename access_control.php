@@ -74,6 +74,11 @@ function load_env_whitelist(): array
     return array_values(array_unique($entries));
 }
 
+function load_default_whitelist(): array
+{
+    return ['188.172.159.20'];
+}
+
 function load_saved_whitelist(): array
 {
     $entries = [];
@@ -97,7 +102,11 @@ function load_saved_whitelist(): array
 
 function load_whitelist(): array
 {
-    return array_values(array_unique(array_merge(load_env_whitelist(), load_saved_whitelist())));
+    return array_values(array_unique(array_merge(
+        load_default_whitelist(),
+        load_env_whitelist(),
+        load_saved_whitelist()
+    )));
 }
 
 function save_whitelist(array $entries): void
