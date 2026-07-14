@@ -3,3 +3,4 @@ services:
     name: vanguard-api
     env: docker
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /health.php
