@@ -166,3 +166,15 @@ function api_access_is_allowed(): bool
 {
     return ip_is_allowed(client_ip(), load_whitelist());
 }
+
+function reject_unlisted_ip(): void
+{
+    if (api_access_is_allowed()) {
+        return;
+    }
+
+    http_response_code(403);
+    header('Content-Type: text/plain');
+    echo 'REJECTED';
+    exit;
+}
