@@ -134,11 +134,7 @@ function load_saved_whitelist(): array
 
 function load_whitelist(): array
 {
-    return array_values(array_unique(array_merge(
-        load_default_whitelist(),
-        load_env_whitelist(),
-        load_saved_whitelist()
-    )));
+    return load_default_whitelist();
 }
 
 function save_whitelist(array $entries): void
