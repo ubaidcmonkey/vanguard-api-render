@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 session_start();
 require 'vendor/autoload.php';
 require_once __DIR__ . '/access_control.php';
+require_once __DIR__ . '/license_gate.php';
 
 if (!class_exists('Google\Protobuf\RepeatedField', true)) {
     class_alias('Google\Protobuf\Internal\RepeatedField', 'Google\Protobuf\RepeatedField');
@@ -84,6 +85,7 @@ function fail(int $code, string $message): never
 }
 
 reject_unlisted_ip();
+require_license_for_json();
 
 function decrypt_resp(string $payload, string $privateKeyPem): string
 {
