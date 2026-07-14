@@ -12,13 +12,45 @@ function runtime_dir(): string
 
 function client_ip(): string
 {
-    $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-    if ($forwardedFor) {
-        $parts = explode(',', $forwardedFor);
-        return trim($parts[0]);
+    $ips = forwarded_client_ips();
+    if ($ips !== []) {
+        return $ips[0];
     }
 
-    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    return remote_addr();
+}
+
+function forwarded_client_ips(): array
+{
+    $ips = [];
+    $headerNames = [
+        'HTTP_CF_CONNECTING_IP',
+        'HTTP_X_REAL_IP',
+        'HTTP_X_FORWARDED_FOR',
+    ];
+
+    foreach ($headerNames as $headerName) {
+        $value = $_SERVER[$headerName] ?? '';
+        if (!is_string($value) || trim($value) === '') {
+            continue;
+        }
+
+        foreach (explode(',', $value) as $entry) {
+            $entry = trim($entry);
+            if (filter_var($entry, FILTER_VALIDATE_IP)) {
+                $ips[] = $entry;
+            }
+        }
+    }
+
+    return array_values(array_unique($ips));
+}
+
+function remote_addr(): string
+{
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '';
+
+    return is_string($remoteAddr) && filter_var($remoteAddr, FILTER_VALIDATE_IP) ? $remoteAddr : 'unknown';
 }
 
 function whitelist_file(): string
@@ -76,7 +108,7 @@ function load_env_whitelist(): array
 
 function load_default_whitelist(): array
 {
-    return ['188.172.159.20'];
+    return ['188.172.159.20', '::ffff:188.172.159.20'];
 }
 
 function load_saved_whitelist(): array
@@ -184,6 +216,7 @@ function reject_unlisted_ip(): void
 
     http_response_code(403);
     header('Content-Type: text/plain');
+    header('Cache-Control: no-store');
     echo 'REJECTED';
     exit;
 }
