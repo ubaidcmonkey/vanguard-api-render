@@ -1,6 +1,14 @@
 <?php
-session_start();
 require_once __DIR__ . '/access_control.php';
+
+if (!api_access_is_allowed()) {
+    http_response_code(403);
+    header('Content-Type: text/plain');
+    echo 'Forbidden';
+    exit;
+}
+
+session_start();
 
 $adminPassword = getenv('ADMIN_PASSWORD') ?: 'ub12ub34';
 $adminReady = is_string($adminPassword) && $adminPassword !== '';
