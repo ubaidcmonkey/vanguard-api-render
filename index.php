@@ -252,6 +252,18 @@ function seen_label(int $lastSeen, int $now): string
             font-size: 12px;
         }
 
+        .admin-link {
+            width: fit-content;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--gold-soft);
+            background: rgba(245, 196, 81, 0.08);
+            font-size: 13px;
+            font-weight: 800;
+            text-decoration: none;
+        }
+
         .empty {
             padding: 34px 22px;
             color: var(--muted);
@@ -284,6 +296,7 @@ function seen_label(int $lastSeen, int $now): string
             <div class="eyebrow"><span class="pulse"></span> Live Gateway Monitor</div>
             <h1>ECHO</h1>
             <p class="subtitle">Vanguard API status panel tracking recent gateway activity and live player connections.</p>
+            <a class="admin-link" href="/admin.php">Admin Panel</a>
         </section>
 
         <section class="grid">
