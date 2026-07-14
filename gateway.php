@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 session_start();
 require 'vendor/autoload.php';
+require_once __DIR__ . '/access_control.php';
 
 if (!class_exists('Google\Protobuf\RepeatedField', true)) {
     class_alias('Google\Protobuf\Internal\RepeatedField', 'Google\Protobuf\RepeatedField');
@@ -28,24 +29,9 @@ $GAME_IDS = [
     "league" => "com.riotgames.league",
 ];
 
-function client_ip(): string
-{
-    $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
-    if ($forwardedFor) {
-        $parts = explode(',', $forwardedFor);
-        return trim($parts[0]);
-    }
-
-    return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-}
-
 function track_active_user(?string $action = null, ?string $game = null): void
 {
-    $runtimeDir = __DIR__ . '/runtime';
-    if (!is_dir($runtimeDir)) {
-        mkdir($runtimeDir, 0777, true);
-    }
-
+    $runtimeDir = runtime_dir();
     $file = $runtimeDir . '/active_users.json';
     $now = time();
     $ip = client_ip();
@@ -95,6 +81,10 @@ function fail(int $code, string $message): never
 {
     http_response_code($code);
     die(json_encode(["success" => false, "message" => $message]));
+}
+
+if (!api_access_is_allowed()) {
+    fail(403, "ip not whitelisted");
 }
 
 function decrypt_resp(string $payload, string $privateKeyPem): string
