@@ -14,5 +14,7 @@ RUN composer install --no-interaction --no-dev --optimize-autoloader
 
 COPY . .
 
+RUN echo "auto_prepend_file=/var/www/html/prepend_access.php" > /usr/local/etc/php/conf.d/access-control.ini
+
 RUN chown -R www-data:www-data /var/www/html && \
     chmod -R 755 /var/www/html
