@@ -51,18 +51,25 @@ function seen_label(int $lastSeen, int $now): string
     <title>ECHO</title>
     <style>
         :root {
-            --gold: #f5c451;
-            --gold-soft: #ffd978;
-            --black: #050505;
-            --panel: #111113;
-            --panel-2: #181816;
-            --text: #f6f0df;
-            --muted: #9d9686;
-            --line: rgba(245, 196, 81, 0.26);
+            --bg: #07090d;
+            --panel: rgba(14, 18, 24, 0.84);
+            --panel-strong: rgba(20, 26, 34, 0.94);
+            --text: #f5f7fb;
+            --muted: #9099a8;
+            --line: rgba(255, 255, 255, 0.12);
+            --gold: #f3c35b;
+            --teal: #55d6c2;
+            --blue: #7aa7ff;
+            --red: #ff6f79;
+            --shadow: rgba(0, 0, 0, 0.42);
         }
 
         * {
             box-sizing: border-box;
+        }
+
+        html {
+            background: var(--bg);
         }
 
         body {
@@ -71,45 +78,70 @@ function seen_label(int $lastSeen, int $now): string
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             color: var(--text);
             background:
-                linear-gradient(135deg, rgba(245, 196, 81, 0.14), transparent 30%),
-                radial-gradient(circle at 80% 10%, rgba(245, 196, 81, 0.18), transparent 30%),
-                var(--black);
+                linear-gradient(130deg, rgba(85, 214, 194, 0.13), transparent 28%),
+                linear-gradient(310deg, rgba(243, 195, 91, 0.11), transparent 34%),
+                linear-gradient(180deg, #0b1119 0%, #07090d 48%, #050609 100%);
+            overflow-x: hidden;
         }
 
-        .scanlines {
+        body::before {
+            content: "";
             position: fixed;
             inset: 0;
             pointer-events: none;
-            background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-            background-size: 100% 5px;
-            opacity: 0.18;
+            background:
+                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+            background-size: 72px 72px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.88), transparent 78%);
+        }
+
+        #signal-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.34;
         }
 
         main {
-            width: min(1120px, calc(100% - 32px));
+            position: relative;
+            z-index: 1;
+            width: min(1180px, calc(100% - 32px));
             min-height: 100vh;
             margin: 0 auto;
-            padding: 48px 0;
+            padding: 34px 0;
             display: grid;
-            align-content: center;
+            align-content: start;
             gap: 24px;
         }
 
         .hero {
+            min-height: 310px;
             display: grid;
-            gap: 18px;
-            padding-bottom: 8px;
+            grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+            gap: 22px;
+            align-items: stretch;
+            padding: 24px 0 0;
             border-bottom: 1px solid var(--line);
+        }
+
+        .hero-copy {
+            display: grid;
+            align-content: center;
+            gap: 18px;
+            padding-bottom: 24px;
         }
 
         .eyebrow {
             display: flex;
             align-items: center;
             gap: 10px;
-            color: var(--gold-soft);
+            color: var(--teal);
             font-size: 12px;
             font-weight: 800;
-            letter-spacing: 0.18em;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
         }
 
@@ -117,38 +149,123 @@ function seen_label(int $lastSeen, int $now): string
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: var(--gold);
-            box-shadow: 0 0 22px var(--gold);
+            background: var(--teal);
+            box-shadow: 0 0 22px var(--teal);
+            animation: breathe 1.8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.82); opacity: 0.68; }
+            50% { transform: scale(1.15); opacity: 1; }
         }
 
         h1 {
             margin: 0;
-            color: var(--gold);
-            font-size: clamp(64px, 12vw, 148px);
-            line-height: 0.86;
+            color: var(--text);
+            font-size: 112px;
+            line-height: 0.88;
             letter-spacing: 0;
-            text-shadow: 0 0 26px rgba(245, 196, 81, 0.24);
+            text-shadow: 0 0 30px rgba(122, 167, 255, 0.22);
         }
 
         .subtitle {
             max-width: 720px;
             margin: 0;
             color: var(--muted);
-            font-size: 18px;
+            font-size: 17px;
             line-height: 1.6;
+        }
+
+        .hero-panel {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent),
+                var(--panel);
+            box-shadow: 0 30px 90px var(--shadow);
+        }
+
+        .hero-panel::before {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border: 1px solid rgba(85, 214, 194, 0.28);
+            border-radius: 8px;
+        }
+
+        .radar {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            right: 34px;
+            top: 30px;
+            border: 1px solid rgba(85, 214, 194, 0.26);
+            border-radius: 50%;
+            background:
+                linear-gradient(90deg, transparent 49.5%, rgba(85, 214, 194, 0.22) 50%, transparent 50.5%),
+                linear-gradient(0deg, transparent 49.5%, rgba(85, 214, 194, 0.22) 50%, transparent 50.5%),
+                radial-gradient(circle, transparent 29%, rgba(85, 214, 194, 0.16) 30%, transparent 31%, transparent 59%, rgba(85, 214, 194, 0.16) 60%, transparent 61%);
+        }
+
+        .radar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, rgba(85, 214, 194, 0.55), rgba(85, 214, 194, 0.02) 54deg, transparent 55deg);
+            animation: sweep 4.5s linear infinite;
+        }
+
+        @keyframes sweep {
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-metrics {
+            position: absolute;
+            inset: auto 22px 22px 22px;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .mini {
+            min-height: 82px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 13px;
+            background: rgba(5, 7, 10, 0.58);
+        }
+
+        .mini span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .mini strong {
+            display: block;
+            margin-top: 10px;
+            color: var(--text);
+            font-size: 22px;
+            line-height: 1;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: 0.9fr 1.5fr;
+            grid-template-columns: 0.82fr 1.5fr;
             gap: 18px;
         }
 
         .panel {
             border: 1px solid var(--line);
             border-radius: 8px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent), var(--panel);
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent), var(--panel);
+            box-shadow: 0 24px 70px var(--shadow);
+            backdrop-filter: blur(18px);
         }
 
         .stat {
@@ -162,7 +279,7 @@ function seen_label(int $lastSeen, int $now): string
             color: var(--muted);
             font-size: 13px;
             font-weight: 800;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
         }
 
@@ -174,14 +291,40 @@ function seen_label(int $lastSeen, int $now): string
         }
 
         .status-pill {
-            width: fit-content;
+            width: 100%;
             border: 1px solid var(--line);
-            border-radius: 999px;
-            padding: 9px 13px;
-            color: var(--gold-soft);
-            background: rgba(245, 196, 81, 0.08);
+            border-radius: 8px;
+            padding: 12px 13px;
+            color: var(--teal);
+            background: rgba(85, 214, 194, 0.08);
             font-size: 13px;
             font-weight: 800;
+        }
+
+        .stat-bars {
+            display: grid;
+            gap: 8px;
+        }
+
+        .bar {
+            height: 8px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .bar span {
+            display: block;
+            width: 68%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
+            animation: barPulse 2.8s ease-in-out infinite;
+        }
+
+        @keyframes barPulse {
+            0%, 100% { transform: translateX(-8%); opacity: 0.74; }
+            50% { transform: translateX(22%); opacity: 1; }
         }
 
         .users {
@@ -194,7 +337,7 @@ function seen_label(int $lastSeen, int $now): string
             justify-content: space-between;
             gap: 16px;
             border-bottom: 1px solid var(--line);
-            background: var(--panel-2);
+            background: var(--panel-strong);
         }
 
         .users-header h2 {
@@ -215,10 +358,11 @@ function seen_label(int $lastSeen, int $now): string
             min-height: 66px;
             padding: 16px 22px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-columns: minmax(0, 1fr) 120px;
             gap: 14px;
             align-items: center;
-            border-bottom: 1px solid rgba(245, 196, 81, 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: linear-gradient(90deg, rgba(85, 214, 194, 0.04), transparent);
         }
 
         .user-row:last-child {
@@ -235,27 +379,43 @@ function seen_label(int $lastSeen, int $now): string
 
         .meta {
             margin-top: 6px;
-            color: var(--muted);
+            color: var(--blue);
             font-size: 12px;
             text-transform: uppercase;
         }
 
         .seen {
-            color: var(--gold-soft);
+            color: var(--teal);
             font-size: 13px;
             font-weight: 800;
             white-space: nowrap;
+            text-align: right;
         }
 
         .keepalive {
-            color: var(--muted);
+            color: var(--teal);
             font-size: 12px;
+            font-weight: 800;
         }
 
         .empty {
             padding: 34px 22px;
             color: var(--muted);
             line-height: 1.6;
+        }
+
+        @media (max-width: 920px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-panel {
+                min-height: 280px;
+            }
+
+            h1 {
+                font-size: 82px;
+            }
         }
 
         @media (max-width: 760px) {
@@ -271,19 +431,50 @@ function seen_label(int $lastSeen, int $now): string
                 font-size: 58px;
             }
 
+            .hero-metrics {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 62px;
+            }
+
             .user-row {
                 grid-template-columns: 1fr;
+            }
+
+            .seen {
+                text-align: left;
             }
         }
     </style>
 </head>
 <body>
-    <div class="scanlines"></div>
+    <canvas id="signal-canvas" aria-hidden="true"></canvas>
     <main>
         <section class="hero">
-            <div class="eyebrow"><span class="pulse"></span> Live Gateway Monitor</div>
-            <h1>ECHO</h1>
-            <p class="subtitle">Vanguard API status panel tracking recent gateway activity and live player connections.</p>
+            <div class="hero-copy">
+                <div class="eyebrow"><span class="pulse"></span> Live Gateway Monitor</div>
+                <h1>ECHO</h1>
+                <p class="subtitle">A real-time command view for gateway activity, active request origins, and service heartbeat across the Vanguard API.</p>
+            </div>
+            <div class="hero-panel" aria-hidden="true">
+                <div class="radar"></div>
+                <div class="hero-metrics">
+                    <div class="mini">
+                        <span>Refresh</span>
+                        <strong>30s</strong>
+                    </div>
+                    <div class="mini">
+                        <span>Window</span>
+                        <strong>15m</strong>
+                    </div>
+                    <div class="mini">
+                        <span>Signal</span>
+                        <strong>Live</strong>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section class="grid">
@@ -291,6 +482,11 @@ function seen_label(int $lastSeen, int $now): string
                 <div class="stat-label">Active Users</div>
                 <div class="stat-value"><?= count($activeUsers) ?></div>
                 <div class="status-pill">Gateway Online</div>
+                <div class="stat-bars" aria-hidden="true">
+                    <div class="bar"><span></span></div>
+                    <div class="bar"><span></span></div>
+                    <div class="bar"><span></span></div>
+                </div>
             </aside>
 
             <section class="panel users">
@@ -328,6 +524,67 @@ function seen_label(int $lastSeen, int $now): string
     </main>
     <script>
         const keepalive = document.getElementById('keepalive');
+        const canvas = document.getElementById('signal-canvas');
+        const ctx = canvas.getContext('2d');
+        let points = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+            points = Array.from({ length: 38 }, () => ({
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                vx: (Math.random() - 0.5) * 0.34,
+                vy: (Math.random() - 0.5) * 0.34
+            }));
+        }
+
+        function drawSignals() {
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            ctx.lineWidth = 1;
+
+            for (const point of points) {
+                point.x += point.vx;
+                point.y += point.vy;
+
+                if (point.x < 0 || point.x > window.innerWidth) {
+                    point.vx *= -1;
+                }
+
+                if (point.y < 0 || point.y > window.innerHeight) {
+                    point.vy *= -1;
+                }
+            }
+
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const a = points[i];
+                    const b = points[j];
+                    const dx = a.x - b.x;
+                    const dy = a.y - b.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 170) {
+                        ctx.strokeStyle = 'rgba(85, 214, 194,' + (0.14 - distance / 1400) + ')';
+                        ctx.beginPath();
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            ctx.fillStyle = 'rgba(122, 167, 255, 0.62)';
+            for (const point of points) {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 1.7, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            requestAnimationFrame(drawSignals);
+        }
 
         async function pingGateway() {
             try {
@@ -342,6 +599,9 @@ function seen_label(int $lastSeen, int $now): string
             }
         }
 
+        resizeCanvas();
+        drawSignals();
+        window.addEventListener('resize', resizeCanvas);
         pingGateway();
         setInterval(pingGateway, 240000);
     </script>
