@@ -92,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $adminReady) {
 $authenticated = $adminReady && !empty($_SESSION['admin_authenticated']);
 $now = time();
 $currentIp = client_ip();
+$defaultWhitelist = load_default_whitelist();
 $envWhitelist = load_env_whitelist();
 $savedWhitelist = load_saved_whitelist();
 $whitelist = load_whitelist();
@@ -474,16 +475,23 @@ usort($activeUsers, static function (array $a, array $b): int {
                         <?php endif; ?>
 
                         <?php foreach ($whitelist as $entry): ?>
-                            <?php $isEnvEntry = in_array($entry, $envWhitelist, true) && !in_array($entry, $savedWhitelist, true); ?>
+                            <?php
+                                $isDefaultEntry = in_array($entry, $defaultWhitelist, true) && !in_array($entry, $savedWhitelist, true);
+                                $isEnvEntry = in_array($entry, $envWhitelist, true) && !in_array($entry, $savedWhitelist, true);
+                                $isLockedEntry = $isDefaultEntry || $isEnvEntry;
+                            ?>
                             <div class="row">
                                 <div>
                                     <div class="mono"><?= e($entry) ?></div>
+                                    <?php if ($isDefaultEntry): ?>
+                                        <div class="meta">Built in</div>
+                                    <?php endif; ?>
                                     <?php if ($isEnvEntry): ?>
                                         <div class="meta">From API_ALLOWED_IPS</div>
                                     <?php endif; ?>
                                 </div>
-                                <?php if ($isEnvEntry): ?>
-                                    <span class="status">Env</span>
+                                <?php if ($isLockedEntry): ?>
+                                    <span class="status"><?= $isDefaultEntry ? 'Built in' : 'Env' ?></span>
                                 <?php else: ?>
                                     <form method="post" action="/admin.php">
                                         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
