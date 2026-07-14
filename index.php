@@ -1,4 +1,13 @@
 <?php
+require_once __DIR__ . '/access_control.php';
+
+if (!api_access_is_allowed()) {
+    http_response_code(403);
+    header('Content-Type: text/plain');
+    echo 'Forbidden';
+    exit;
+}
+
 http_response_code(200);
 
 $activeWindow = 900;
